@@ -1,0 +1,36 @@
+[submodule "synpp"]
+	path = synpp
+	url = https://github.com/eqasim-org/synpp
+[submodule "dlr-tsc"]
+	path = dlr-tsc
+	url = https://github.com/DLR-TS/tsc
+[submodule "eqasim-france"]
+	path = eqasim-france
+	url = https://github.com/eqasim-org/eqasim-france
+[submodule "eqasim-sao-paulo"]
+	path = eqasim-sao-paulo
+	url = https://github.com/eqasim-org/eqasim-sao-paulo
+[submodule "gross"]
+	path = gross
+	url = https://github.com/ethz-coss/GROSS
+[submodule "matsim-berlin"]
+	path = matsim-berlin
+	url = https://github.com/matsim-scenarios/matsim-berlin
+[submodule "matsim-python-tools"]
+	path = matsim-python-tools
+	url = https://github.com/matsim-vsp/matsim-python-tools
+[submodule "matsim-scenario-template"]
+	path = matsim-scenario-template
+	url = https://github.com/matsim-scenarios/matsim-scenario-template
+[submodule "single-tsc-baselines"]
+	path = single-tsc-baselines
+	url = https://github.com/Traffic-Alpha/SingleTSCBaselines
+[submodule "sumo"]
+	path = sumo
+	url = https://github.com/eclipse-sumo/sumo
+[submodule "sumo-berlin"]
+	path = sumo-berlin
+	url = https://github.com/DLR-TS/sumo-berlin
+[submodule "sumo-scenarios"]
+	path = sumo-scenarios
+	url = https://github.com/DLR-TS/sumo-scenarios

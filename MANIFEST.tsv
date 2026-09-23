@@ -1,0 +1,14 @@
+tier	name	url	mode	status	commit	commit_date
+1	eqasim-france	https://github.com/eqasim-org/eqasim-france	full	ok	a9db00cf776244874fd2c80c7ce2281b69180c69	2026-09-23
+1	synpp	https://github.com/eqasim-org/synpp	full	ok	7b4f70b199fcc58b9a1343f250e6369e7d7eda88	2026-08-11
+1	dlr-tsc	https://github.com/DLR-TS/tsc	full	ok	3962e7f2af27263777bbe899dfe72d6147ff7509	2026-07-06
+1	matsim-berlin	https://github.com/matsim-scenarios/matsim-berlin	full	ok	04d23cd1147228543282234befc98f2d0a683cb7	2025-01-13
+2	matsim-scenario-template	https://github.com/matsim-scenarios/matsim-scenario-template	full	ok	7a9243a90e80e5063f11789b9fb3cc153ab6ccf3	2026-09-23
+2	eqasim-sao-paulo	https://github.com/eqasim-org/eqasim-sao-paulo	full	ok	26a6a46e397853b08fc0e848c115174f4baf0f74	2021-11-01
+2	sumo-scenarios	https://github.com/DLR-TS/sumo-scenarios	light	ok	00f6eb479a9dc0fbaeb731495c11d48d7a9661d3	2026-06-08
+3	pam-sdist	pypi:cml-pam==0.3.2	sdist	FAILED	-	-
+3	matsim-python-tools	https://github.com/matsim-vsp/matsim-python-tools	full	ok	2c37998a17bd437f58450ad4be51c5c9eb9b47bd	2026-06-16
+4	sumo	https://github.com/eclipse-sumo/sumo	sparse:tools/import/matsim tests/tools/import/MATSim docs/web/docs/Tools/Import	ok	ca13a385cf272bc17c03777423c4b19c54d088ba	2026-09-23
+4	single-tsc-baselines	https://github.com/Traffic-Alpha/SingleTSCBaselines	full	ok	3147aa9aef16e5c78f83a557d2935a41c1fde079	2026-07-03
+opt	gross	https://github.com/ethz-coss/GROSS	full	ok	d1134079021eab78fb40fb1e30580809d396f00e	2026-05-16
+opt	sumo-berlin	https://github.com/DLR-TS/sumo-berlin	light	ok	049a642a77e37a8b20c104df0d7b1af8cb0a170b	2026-09-04

@@ -40,6 +40,7 @@ Każdy etap ma ten sam układ:
 - **Bazujemy na**: konkretne repozytoria referencyjne i wzorce z nich.
 - **Zależy od / zasila**: relacje z innymi etapami.
 - **Czas**: czas kalendarzowy. Założenie: 1–3 osoby na etap, praca w niepełnym wymiarze (studenci MSc + koło). Pierwszy projekt tego typu, więc przyjmuj górną granicę widełek.
+- **Wsparcie agentów**: co mogą zrobić agenci AI (np. Claude Code), a co wymaga człowieka. Udział procentowy to zgrubny szacunek pracy *wykonawczej*, którą agent może przejąć. Decyzje i weryfikacja zawsze zostają po stronie człowieka. Zasady przekrojowe: §5.
 - **Kamień milowy**: weryfikowalny stan, który kończy etap.
 - **Pivot**: co robimy, jeśli nie zdążymy.
 
@@ -80,6 +81,17 @@ Każdy etap ma ten sam układ:
 
 **Czas:** 3–5 tygodni. Część (CI, fixtury, manifest) dojrzewa równolegle z E1–E2.
 
+**Wsparcie agentów: wysokie (~60–70%).**
+- *Agent:*
+  - szkielet workspace'u `uv`, root `pyproject.toml`, pre-commit, CI;
+  - Dockerfile / konfiguracja przypiętych wersji SUMO i JDK;
+  - schemat `meta.json` i biblioteka do jego zapisu;
+  - generatory syntetycznych fixtur na podstawie opisu schematu danych;
+  - szkice ADR-ów z materiału Fazy 1–2 (który sam powstał z pomocą agentów).
+- *Człowiek:*
+  - **same decyzje**: obszar badania, orkiestrator, licencje, kryteria dokładności. To uzgodnienia zespołu i promotorów, agent może tylko przygotować opcje;
+  - dostęp do klastra i sprzętu, uzgodnienia z uczelnią.
+
 **Kamień milowy M0 „Gotowy warsztat”:**
 - ADR-y dla orkiestratora, Javy, sieci, obszaru i licencji zmergowane;
 - `uv sync` + przypięte SUMO/JDK działają na maszynach zespołu i w CI;
@@ -116,6 +128,18 @@ Jedna decyzja jest tu nieoczywista: **wybór „dnia referencyjnego”**. Typowy
 **Zależy od:** E0 (schematy, układ katalogów). **Zasila:** E2, E4, E6, E8.
 
 **Czas:** 4–8 tygodni na pierwszą wersję wszystkich zbiorów. Potem etap ciągły. Największe ryzyko to **czas uzyskania danych od ZDiUM i operatora komórkowego**, nie praca techniczna.
+
+**Wsparcie agentów: średnie (~40–50%).**
+- *Agent:*
+  - parsery i stage'e czyszczące do ustalonego schematu, walidacja schematów;
+  - notebooki EDA, szkice kart danych `docs/dane/` z metadanych plików;
+  - syntetyczne odpowiedniki zbiorów zastrzeżonych;
+  - adaptery KBR 2018/2024 do wspólnego schematu (wzorzec mPT).
+- *Człowiek:*
+  - **pozyskanie danych**: umowy, kontakty z ZDiUM i operatorem komórkowym. Tu agent nic nie przyspieszy, a to dominuje czas etapu;
+  - rozumienie semantyki: książki kodów KBR, znaczenie kodów detektorów, znane błędy pomiarów. Tej wiedzy nie ma w plikach;
+  - ocena wiarygodności danych i wybór dnia referencyjnego.
+- *Ograniczenie:* dane zastrzeżone **nie trafiają do kontekstu agenta w chmurze**, chyba że umowa udostępnienia wprost na to pozwala. Agent pracuje na schematach i fixturach syntetycznych, a kod uruchamia się na prawdziwych danych lokalnie. Agent widzi tylko agregaty, które wolno ujawnić (patrz §5).
 
 **Kamień milowy M1 „Dane gotowe do użycia”:**
 - każdy zbiór ma kartę w `docs/dane/` i stage produkujący `processed/` w ustalonym schemacie;
@@ -163,6 +187,19 @@ Kroki koncepcyjne:
 
 To etap z najdłuższym ogonem: poprawki sieci ciągną się do końca kalibracji w E8.
 
+**Wsparcie agentów: niskie–średnie (~30%).**
+- *Agent:*
+  - skrypt budowy sieci, `.netccfg`, `*.typ.xml`, testy referencji i wymagań RL;
+  - konwertery geobazy ZDiUM → detektory `*.add.xml` i programy TLS → `tllogic` / CSV dla `tls_csvSignalGroups.py`;
+  - ekstrakcja programów sygnalizacji z dokumentacji ZDiUM (często PDF/skany). Każdy wynik do weryfikacji przez człowieka;
+  - **automatyczne wskazywanie podejrzanych miejsc** do przeglądu: niezgodna liczba pasów między OSM a detektorami, skrzyżowania z nietypową liczbą połączeń, krawędzie bez ruchu w szkielecie. To najlepsze użycie agenta w tym etapie: ustala kolejkę pracy człowieka.
+- *Człowiek:*
+  - **wizualna weryfikacja w netedit / sumo-gui** względem ortofotomapy i Street View: pasy, relacje skrętne, sklejanie skrzyżowań, torowiska. Agent nie ocenia wiarygodnie geometrii przestrzennej;
+  - lokalna wiedza o skrzyżowaniach Wrocławia;
+  - decyzja, czy poprawka idzie do OSM, czy do łatki;
+  - zatwierdzenie programów sygnalizacji.
+- Etap dobry dla koła naukowego: dużo pracy ręcznej, dającej się podzielić na dzielnice/korytarze.
+
 **Kamienie milowe:**
 - **M2a „Sieć v0”:** sieć całego obszaru budowana jednym poleceniem ze snapshotu; przechodzi `netcheck`; puste `sumo -c` startuje.
 - **M2b „Sieć v1”:**
@@ -196,6 +233,10 @@ Do zrobienia:
 
 **Czas:** 2–4 tygodnie na pierwszą wersję. Potem regeneracja przy każdej wersji sieci SUMO, automatyczna, jeśli E0 zrobione dobrze.
 
+**Wsparcie agentów: wysokie (~70–80%).**
+- *Agent:* integracja `network-from-sumo` w pipeline, filtrowanie GTFS, generacja schedule, testy zgodności ID, diagnostyka rozjazdów topologii między sieciami.
+- *Człowiek:* decyzja o opcjach `netconvert` wpływających na topologię manewrów; kontrola wiarygodności rozkładu PT na mapie.
+
 **Kamień milowy M3 „Sieć MATSim zgodna z SUMO”:** sieć MATSim + schedule PT generowane automatycznie z sieci SUMO, z testem zgodności ID; MATSim wczytuje sieć i routuje losowe pary punktów.
 
 **Pivot:** konwerter `network-from-sumo` sprawia problemy → pt2matsim z OSM + jawny plik mapowania link → edge budowany geometrycznie i walidowany testem. Konsekwencja: w E7 przechodzimy na wariant geo-tripów (patrz E7).
@@ -225,6 +266,16 @@ Od początku robimy dwie wersje: KBR 2018 i KBR 2024 jako warianty wybierane w k
 **Czas:**
 - v0 (populacja uproszczona, patrz pivot): 2–3 tygodnie;
 - v1 (pełna synteza w stylu eqasim): 8–14 tygodni.
+
+**Wsparcie agentów: średnie (~50%).**
+- *Agent:*
+  - implementacja stage'y na podstawie *opisu wzorców* z eqF/eqSP (bez kopiowania kodu GPL, patrz §5);
+  - IPF / próbkowanie, writery MATSim, testy determinizmu;
+  - raporty porównawcze rozkładów: populacja syntetyczna vs GUS vs KBR.
+- *Człowiek:*
+  - **decyzje metodologiczne**: zmienne dopasowania w hot-deck, traktowanie wag ankiety, model lokalizacji drugorzędnych, ruch zewnętrzny i towarowy. To rdzeń co najmniej jednej pracy magisterskiej, więc autorstwo metody musi być ludzkie;
+  - ocena, czy rozbieżności rozkładów są akceptowalne;
+  - sprawdzenie, że wagi faktycznie działają (eqSP pokazuje, jak łatwo je zgubić). Agent napisze test, ale człowiek musi wiedzieć, co test ma sprawdzać.
 
 **Kamienie milowe:**
 - **M4a „Populacja v0”:** dowolnie prosta populacja dla całego obszaru, poprawna dla MATSim; służy walking skeleton (M-SK).
@@ -259,6 +310,17 @@ Od początku robimy dwie wersje: KBR 2018 i KBR 2024 jako warianty wybierane w k
 
 **Czas:** 4–8 tygodni do stabilnego biegu 10%.
 
+**Wsparcie agentów: średnie–wysokie (~50–60%).**
+- *Agent:*
+  - projekt Maven z szablonu, klasy `Run*`, config, wrapper Pythona;
+  - smoke test w CI, skrypty jobów na klaster;
+  - wykresy i raporty zbieżności;
+  - analiza logów MATSim (wyjątki, stuck agents, pamięć). Agenci dobrze czytają długie logi i kod matsim-libs.
+- *Człowiek:*
+  - wybór strategii replanningu i struktury scoringu (decyzja modelowa);
+  - **ocena, czy „zbieżność” jest prawdziwa**, a nie artefaktem konfiguracji;
+  - obsługa klastra i budżetu obliczeń.
+
 **Kamień milowy M5 „MATSim zbiega się”:** scenariusz 10% całego obszaru przechodzi ≥ 100 iteracji bez awarii, score i udziały modalne stabilizują się w ostatnich ~20% iteracji, a wynik jest odtwarzalny (ten sam seed → te same wyniki). Smoke test 1% w CI.
 
 **Pivot:**
@@ -292,6 +354,17 @@ Uwagi:
 - 6a: 3–5 tygodni (głównie czas obliczeń);
 - 6b: +2–4 tygodnie;
 - 6c i 6d: po 4–8 tygodni każdy. Mogą iść równolegle z 6b, prowadzone przez inne osoby.
+
+**Wsparcie agentów: średnie (~50%), ale etap jest ograniczony obliczeniami, nie pracą.**
+- *Agent:*
+  - adaptacja `calibrate.py` z mT (uzupełnienie FIXME), integracja z mPT `create_calibration()`;
+  - skrypty jobów, zbieranie i porównywanie wyników biegów;
+  - **pilnowanie długich pętli kalibracji**: wznawianie po awarii, raport po każdym triale, alarm przy rozbieżności. Wielodniowe biegi to naturalne zastosowanie agenta działającego w pętli;
+  - pipeline 6c (mikrosymulacje SUMO + regresja) na bazie mPT `scenariogen/network/`.
+- *Człowiek:*
+  - wybór, co kalibrować i w jakiej kolejności;
+  - **ocena wiarygodności parametrów**. ASC potrafi „skompensować” błąd sieci lub populacji i dać dobre udziały z bezsensownymi wartościami. Wykrycie tego wymaga zrozumienia modelu;
+  - decyzja o zatrzymaniu i o budżecie obliczeń.
 
 **Kamienie milowe:**
 - **M6a „Udziały modalne skalibrowane”:** MAE udziałów modalnych < 3 p.p. (próg z testu mPT) dla wariantu KBR 2024; parametry zapisane jako wersjonowany plik.
@@ -332,6 +405,15 @@ Uwagi:
 
 **Czas:** projekt 2–3 tygodnie; eksporter + testy 3–5 tygodni.
 
+**Wsparcie agentów: wysokie (~70%).**
+- *Agent:*
+  - analiza zachowania `matsim_importPlans.py` na jego fixturach (tak powstały ustalenia w `notes/sumo.md`);
+  - szkic kontraktu z wariantami do wyboru;
+  - eksporter, testy golden-file, walidacja ID względem hasha sieci, raport strat konwersji.
+- *Człowiek:*
+  - **rozstrzygnięcia kontraktu** (trasy vs geo, kto skaluje, polityka `ride`, jitter). Każde ma konsekwencje dla dokładności i dla późniejszego RL;
+  - przegląd raportu strat: czy to, co ginie, jest akceptowalne.
+
 **Kamień milowy M7 „Artefakt v1”:**
 - kontrakt w `docs/decyzje/`;
 - eksporter z testami golden-file na syntetycznych fixturach;
@@ -368,6 +450,18 @@ Ich naprawa to iteracja: łatka sieci w E2 → regeneracja → ponowny bieg. Nas
 
 **Czas:** 6–10 tygodni. Etap iteracyjny z E2, przeplatany z nim.
 
+**Wsparcie agentów: niskie–średnie (~35–40%).**
+- *Agent:*
+  - generacja `.sumocfg` z jednego źródła, test integralności, smoke test;
+  - skrypty porównań: GEH, czasy przejazdu vs GPS, skimy MATSim ↔ SUMO, benchmark w stylu Wildau;
+  - **triage problemów z logów**: ranking skrzyżowań wg teleportacji i czasu oczekiwania, wskazanie kandydatów na gridlock. Agent zawęża, gdzie człowiek ma patrzeć;
+  - przebiegi `routeSampler` i sweepy parametrów `vType`.
+- *Człowiek:*
+  - **wizualna diagnoza w sumo-gui**: dlaczego tu powstaje korek, czy kolejka wygląda jak w rzeczywistości. To główny koszt etapu;
+  - decyzja o poprawce (sieć? sygnalizacja? popyt? parametry kierowcy?);
+  - ocena realizmu na podstawie znajomości miasta;
+  - decyzje pivotowe (podobszar, szczyty).
+
 **Kamień milowy M8 „SUMO realistyczne”:**
 - scenariusz pełnej doby (lub szczytów) dla obszaru przebiega bez gridlocków;
 - teleportacje poniżej ustalonego progu;
@@ -402,6 +496,14 @@ Ich naprawa to iteracja: łatka sieci w E2 → regeneracja → ponowny bieg. Nas
 **Zależy od:** E8 (i pośrednio wszystkiego). **Zasila:** przyszłą fazę RL.
 
 **Czas:** 3–5 tygodni.
+
+**Wsparcie agentów: wysokie (~60%).**
+- *Agent:* generacja raportu walidacyjnego z wyników, pakowanie i test „czysta maszyna”, automatyzacja release'u, szkic changelogu i dokumentacji scenariusza, `CITATION.cff`.
+- *Człowiek:*
+  - wybór i ochrona zbioru hold-out (żeby nie wyciekł do kalibracji);
+  - **interpretacja wyników i opis zakresu ważności twina**;
+  - zatwierdzenie release'u;
+  - tekst publikacji i prac magisterskich.
 
 **Kamień milowy M9 „Twin v1.0”:**
 - raport walidacyjny (hold-out) spełnia kryteria z E0 albo jawnie dokumentuje odchylenia;
@@ -521,3 +623,51 @@ Pivoty z poszczególnych etapów składają się w trzy spójne „profile ambic
 - **Moc obliczeniowa dla kalibracji.** Trzeba ją sprawdzić w E0, a nie w E6.
 - **Rotacja ludzi** (koło naukowe, koniec semestru). Chroni przed nią wyłącznie E0: manifesty, testy, karty danych, ADR-y. mT „zgnił” właśnie z braku testów regresyjnych (`README.md:7-8`).
 - **Licencje:** GPL/AGPL w eqasim/matsim, dane zastrzeżone. Każdy artefakt publikowany musi mieć tabelę licencji per źródło, zanim wyjdzie poza zespół.
+
+---
+
+## 5. Agenci AI vs praca człowieka: podsumowanie
+
+| Etap | Wsparcie agentów | Wąskie gardło etapu | Czy agenci skracają etap? |
+|---|---|---|---|
+| E0 Fundamenty | wysokie (~60–70%) | uzgodnienia zespołu | tak, część techniczna znacząco |
+| E1 Dane | średnie (~40–50%) | pozyskanie danych, semantyka | słabo: dominuje czas instytucji |
+| E2 Sieć SUMO | niskie–średnie (~30%) | wizualna weryfikacja sieci | słabo, ale agent ustawia kolejkę przeglądu |
+| E3 Sieć MATSim + PT | wysokie (~70–80%) | — | tak |
+| E4 Populacja | średnie (~50%) | decyzje metodologiczne | umiarkowanie |
+| E5 Pipeline MATSim | średnie–wysokie (~50–60%) | ocena zbieżności, klaster | umiarkowanie |
+| E6 Kalibracja MATSim | średnie (~50%) | **moc obliczeniowa** | słabo: dominuje czas obliczeń |
+| E7 Kontrakt + eksport | wysokie (~70%) | decyzje kontraktu | tak |
+| E8 SUMO + mikro | niskie–średnie (~35–40%) | wizualna diagnoza w sumo-gui | słabo, ale agent zawęża obszar szukania |
+| E9 Walidacja + release | wysokie (~60%) | interpretacja, zatwierdzenie | tak |
+
+**Wniosek dla harmonogramu.** Agenci najmocniej przyspieszają etapy *kodowe* (E0, E3, E7, E9), a te w większości **nie leżą na najdłuższym fragmencie ścieżki krytycznej**. Ścieżkę krytyczną wydłużają:
+- dostęp do danych (E1);
+- ręczna praca nad siecią (E2/E8);
+- metodologia populacji (E4);
+- obliczenia kalibracji (E6).
+
+Agenci skracają je tylko częściowo. Dlatego **nie skracałbym harmonogramu z §3 o więcej niż ~15–20%** z tytułu agentów. Ich realny zysk to:
+- więcej zakresu w tym samym czasie: testy, manifesty, raporty, czyli rzeczy, które w refs zwykle pomijano;
+- mniejsze ryzyko „zgnicia” projektu przy rotacji ludzi.
+
+**Gdzie agenci są najmocniejsi w tym projekcie:**
+1. **Czytanie i porównywanie kodu referencyjnego**: GPL-owe repozytoria MATSim/eqasim, matsim-libs, narzędzia SUMO. Faza 1–2 tego repo jest przykładem.
+2. **Kod „klejący” i infrastruktura**: stage'e, konwertery formatów, CI, testy golden-file, manifesty.
+3. **Analiza dużych logów i wyników**: logi MATSim/SUMO, porównania z licznikami, raporty.
+4. **Nadzór nad długimi przebiegami**: kalibracja, sweepy parametrów. Agent działający w pętli wznawia, raportuje i alarmuje.
+5. **Triage dla człowieka**: ranking podejrzanych skrzyżowań, krawędzi i rozjazdów. Człowiek zaczyna od najważniejszego miejsca, a nie od losowego.
+
+**Gdzie agenci są słabi lub nie powinni działać sami:**
+- ocena geometrii i realizmu ruchu na mapie lub w sumo-gui;
+- lokalna wiedza o mieście;
+- kontakty z instytucjami i pozyskanie danych;
+- decyzje metodologiczne i kontraktowe;
+- ocena, czy skalibrowane parametry są *sensowne*, a nie tylko dopasowane.
+
+**Zasady pracy z agentami (do wpisania jako ADR w E0):**
+1. **Dane zastrzeżone.** Surowe dane KBR, OD komórkowe i dane ZDiUM nie trafiają do kontekstu agenta w chmurze bez sprawdzenia, czy umowa udostępnienia na to pozwala. Domyślnie agent pracuje na schematach i syntetycznych fixturach (wzorzec eqF `tests/testdata.py`) i widzi tylko agregaty dopuszczone do ujawnienia. To ten sam podział, który już obowiązuje dla git.
+2. **Licencje.** Agent może czytać kod GPL/AGPL i opisywać wzorce, ale nie przenosi go do naszego kodu, chyba że świadomie przyjmujemy GPL dla danego pakietu (ADR licencyjny z E0). Ta sama reguła obowiązywała w Fazie 1 (`_analysis/_brief.md`).
+3. **Weryfikacja jak dla każdego PR.** Kod agenta przechodzi przez tę samą regułę „właściciel + reviewer”. Właścicielem issue jest człowiek, który odpowiada za wynik, także gdy kod napisał agent.
+4. **Twierdzenia z dowodem.** Tak jak w notatkach Fazy 1: każde twierdzenie agenta o zachowaniu narzędzia lub danych ma wskazywać `plik:linia` albo wynik testu, nie „z pamięci”.
+5. **Prace magisterskie.** Wkład metodologiczny musi być autorstwa studenta. Warto sprawdzić regulamin uczelni dotyczący użycia AI i jawnie opisać rolę agentów w pracach i publikacji.
